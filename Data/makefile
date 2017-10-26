@@ -2,7 +2,7 @@ CC = gcc
 
 all: main clean
 
-main: main.o util.o menu.o
+main: main.o util.o
 	$(CC) $^ -o $@ -Wall -Wextra -g
 
 %.o: %.c %.h

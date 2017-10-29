@@ -54,7 +54,7 @@ char* read_until(int fd, char stop) {
 		}
 		char* tmp = (char *) realloc(ptr, sizeof(char) * (++count));
 		if (tmp == NULL) {
-			//free(buffer);
+			free(ptr);
 			return NULL;
 		} else {
 			ptr = tmp;
@@ -104,75 +104,6 @@ int read_config(const char* file, Config* config) {
 	return 0;
 }
 
-/*int read_config(const char* file, Config* config) {
-	int fd = open(file, O_RDONLY);
-	if (fd < 0) return 1;
-
-	config->nombre = (char *) malloc(sizeof(char));
-	if (config->nombre == NULL) {
-		close(fd);
-		return 2;
-	}
-
-	int len = read_until(fd, config->nombre, '\n');
-	if (len == 0) {
-		free(config->nombre);
-		close(fd);
-		return 3;
-	}
-
-	char* buff = (char *) malloc(sizeof(char));
-	if (buff == NULL) {
-		free(config->nombre);
-		close(fd);
-		return 4;
-	}
-	len = read_until(fd, buff, '\n');
-	if (len == 0) {
-		free(config->nombre);
-		free(buff);
-		close(fd);
-		return 5;
-	}
-	config->dinero = atoi(buff);
-	free(buff);
-	
-	config->ip = (char *) malloc(sizeof(char));
-	if (config->ip == NULL) {
-		free(config->nombre);
-		close(fd);
-		return 6;
-	}
-	len = read_until(fd, config->ip, '\n');
-	if (len == 0) {
-		free(config->nombre);
-		free(config->ip);
-		close(fd);
-		return 7;
-	}
-
-	buff = (char *) malloc(sizeof(char));
-	if (buff == NULL) {
-		free(config->nombre);
-		free(config->ip);
-		close(fd);
-		return 8;
-	}
-	len = read_until(fd, buff, '\0');
-	if (len == 0) {
-		free(config->nombre);
-		free(config->ip);
-		free(buff);
-		close(fd);
-		return 8;
-	}
-	config->port = atoi(buff);
-	
-	free(buff);
-	close(fd);
-	return 0;
-}*/
-
 void destroy_config(Config config) {
 	free(config.nombre);
 	free(config.ip);
@@ -195,7 +126,7 @@ int strcmpign(const char* a, const char* b) {
 }
 
 ssize_t read_clean(int fd, char* buffer, size_t max) {
-	ssize_t bytes = read(0, buffer, max);
+	ssize_t bytes = read(fd, buffer, max);
 	buffer[bytes - 1] = '\0';
 	return bytes;
 }

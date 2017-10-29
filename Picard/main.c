@@ -15,7 +15,7 @@ void handle_int(int n);
 
 int main(int argc, const char *argv[]) {
 	if (argc < 2) {
-		print(2, "Error: numero de argumentos de entrada no valido.\n", 0);
+		print(2, "Error: numero de argumentos de entrada no valido.\n");
 		return 1;
 	}
 
@@ -26,10 +26,9 @@ int main(int argc, const char *argv[]) {
 		} else {
 			free(c.nombre);
 		}
-		print(2, "Error: Fichero de configuracion invalido.\n", 0);
+		print(2, "Error: Fichero de configuracion invalido.\n");
 		return 2;
 	}
-
 	//Hasta aqui no hay errores de config
 	signal(SIGINT, handle_int);
 
@@ -73,7 +72,7 @@ int main(int argc, const char *argv[]) {
 
 void handle_int(int n) {
 	if (n == SIGINT) {
-		print(1, "\n[Tancat inesperadament]\n[Alliberant recursos]\n");
+		print(1, "\n[Tancat inesperadament]\n[Alliberant recursos...]\n");
 		destroy_config(c);
 		print(1, "[Recursos alliberats]\n");
 		exit(1);

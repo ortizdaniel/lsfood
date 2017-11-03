@@ -33,3 +33,7 @@ int enterprises_add(Enterprise e) {
 		return 1;
 	}
 }
+
+void enterprises_end() {
+	free(enterprises);
+}

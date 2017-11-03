@@ -7,7 +7,7 @@
 typedef struct {
 	char ip[MAX_IP]; //ip es como mucho 255.255.255.255\0
 	int port;
-	unsigned int users_connected;
+	int users_connected;
 	int alive;
 } Enterprise;
 
@@ -18,5 +18,7 @@ Enterprise* enterprises_get();
 int enterprises_size();
 
 int enterprises_add(Enterprise e);
+
+void enterprises_end();
 
 #endif

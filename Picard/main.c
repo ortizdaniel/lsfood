@@ -1,5 +1,6 @@
 #include <signal.h>
 #include "menu.h"
+#include "network.h"
 
 #define MAX_CMD 32
 #define CONNECTA "CONNECTA"
@@ -42,7 +43,18 @@ int main(int argc, const char *argv[]) {
 
 		if (n_args == 1) {
 			if (strcmpign(cmd, CONNECTA) == 0) {
-				cmd_ok();
+				print(1, "Connectant amb LsEat...\n");
+				if (is_connected()) {
+					print(1, "Ya estas conectado! No puedes conectarte otra vez.\n");
+				} else {
+					if (net_connect(c.ip, c.port) == 0) {
+						print(1, "[Connexió amb Data OK]\n");
+						//TODO desconectar de Data, conectar con Enterprise
+						
+					} else {
+						print(1, "[Error de connexió]\n");
+					}
+				}
 			} else if (strcmpign(cmd, MOSTRA_MENU) == 0) {
 				cmd_ok();
 			} else if (strcmpign(cmd, PAGAR) == 0) {

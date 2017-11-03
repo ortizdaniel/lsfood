@@ -110,8 +110,8 @@ void destroy_config(Config config) {
 }
 
 int strcmpign(const char* a, const char* b) {
-	int i;
-	int len = strlen(a);
+	unsigned int i;
+	unsigned int len = strlen(a);
 	if (len != strlen(b)) return -1;
 	
 	char c, d;

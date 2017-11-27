@@ -14,6 +14,17 @@
 #include "util.h"
 
 #define MAX_IN 128
+#define MAX_CMD 32
+
+enum menu_option {
+	ERROR = -1,
+	CONNECTA = 0,
+	MOSTRA_MENU = 1,
+	DEMANA = 2,
+	ELIMINA = 3,
+	DESCONNECTA = 4,
+	PAGAR = 5
+};
 
 /***********************************************************************
 *
@@ -53,7 +64,7 @@ void show_prompt(const char* usr);
 			cmd = MOSTRA MENU
 			retorno = 1
 ************************************************************************/
-int read_cmd(char* cmd, char* arg1, char* arg2);
+int read_cmd(char** cmd, char** arg1, char** arg2);
 
 /***********************************************************************
 *
@@ -74,5 +85,25 @@ void cmd_error();
 * @Ret: -
 ************************************************************************/
 void cmd_ok();
+
+/***********************************************************************
+*
+* @Nombre: check_input
+* @Def: verifica la entrada por terminal del usuario
+* @Arg: In: cmd = comando
+		In: n_args = numero de argumentos
+* @Ret: el numero de la operacion que se queria realizar segun el enum
+		(mirar .h) o error en caso de ser invalido
+************************************************************************/
+int check_input(const char* cmd, int n_args);
+
+/***********************************************************************
+*
+* @Nombre: show_goodbye
+* @Def: le dice adios al usuario
+* @Arg: -
+* @Ret: -
+************************************************************************/
+void show_goodbye();
 
 #endif

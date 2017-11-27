@@ -1,5 +1,22 @@
+/***********************************************************************
+*
+* @Archivo:	util.h util.c
+* @Finalidad: proporcionar distintas utilidades para Picard
+* @Autor: Daniel y Elena
+* @Fecha: 22/10/17
+*
+************************************************************************/
+
 #include "util.h"
 
+/***********************************************************************
+*
+* @Nombre: print
+* @Def: implementacion de mala calidad de printf, para file descriptors
+* @Arg: In: fd = file descriptor donde escribir
+* 			format = el formato con el cual printar
+* @Ret: -
+************************************************************************/
 void print(int fd, const char* format, ...) {
 	va_list list;
 	va_start(list, format);
@@ -42,6 +59,15 @@ void print(int fd, const char* format, ...) {
 	va_end(list);
 }
 
+/***********************************************************************
+*
+* @Nombre: read_until
+* @Def: lee de un file descriptor hasta que se encuentra con un caracter
+		deseado
+* @Arg: In: fd = file descriptor del cual leer
+* 			stop = el caracter comodin con el cual detenerse
+* @Ret: puntero donde se ha leido esta informacion, NULL si error
+************************************************************************/
 char* read_until(int fd, char stop) {
 	char* ptr = (char *) malloc(sizeof(char));
 	if (ptr == NULL) return NULL;
@@ -64,6 +90,19 @@ char* read_until(int fd, char stop) {
 	return ptr;
 }
 
+/***********************************************************************
+*
+* @Nombre: read_config
+* @Def: lee la configuracion del fichero para Picard
+* @Arg: In: file = path donde se encuentra el fichero de configuracion
+* 		Out: config = tipo de Config de salida
+* @Ret: 0 si funcionamiento correcto.
+		1 si no se pudo encontrar el fichero.
+		2 si no se pudo leer el nombre de Picard.
+		4 si no se pudo leer el dinero.
+		6 si no se pudo leer la IP donde conectarse.
+		8 si no se pudo leer el puerto donde contectarse.
+************************************************************************/
 int read_config(const char* file, Config* config) {
 	int fd = open(file, O_RDONLY);
 	if (fd < 0) return 1;
@@ -104,11 +143,26 @@ int read_config(const char* file, Config* config) {
 	return 0;
 }
 
+/***********************************************************************
+*
+* @Nombre: destroy_config
+* @Def: destruye una Config previamente obtenida con read_config
+* @Arg: In: config = configuracion a ser destruida
+* @Ret: -
+************************************************************************/
 void destroy_config(Config config) {
 	free(config.nombre);
 	free(config.ip);
 }
 
+/***********************************************************************
+*
+* @Nombre: strcmpign
+* @Def: string compare ignore case
+* @Arg: In: a = string 1
+* 			b = string 2
+* @Ret: 0 si las cadenas son iguales, -1 si no
+************************************************************************/
 int strcmpign(const char* a, const char* b) {
 	unsigned int i;
 	unsigned int len = strlen(a);
@@ -125,6 +179,17 @@ int strcmpign(const char* a, const char* b) {
 	return 0;
 }
 
+/***********************************************************************
+*
+* @Nombre: read_clean
+* @Def: lee del file descriptor deseado, y limpia el ultimo caracter.
+		Similar a read_until, pero con un tamano máximo. Recomendable
+		usar para el lectura por terminal.
+* @Arg: In: fd = file descriptor donde leer
+*			max = numero de caracteres maximos a leer
+* 		Out: buffer = string de salida
+* @Ret: numero de bytes leidos totales
+************************************************************************/
 ssize_t read_clean(int fd, char* buffer, size_t max) {
 	ssize_t bytes = read(fd, buffer, max);
 	buffer[bytes - 1] = '\0';

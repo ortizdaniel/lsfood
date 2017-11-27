@@ -1,14 +1,12 @@
 CC = gcc
 
-all: main clean
+all: enterprise clean
 
-main: main.o util.o menu.o
-	$(CC) $^ -o $@ -Wall -Wextra -g
+enterprise: main.o util.o networkpic.o networkdata.o network.o lista.o
+	$(CC) $^ -o $@ -Wall -Wextra -g -lpthread
 
 %.o: %.c %.h
+	$(CC) $< -c -Wall -Wextra
 
 clean: 
 	rm *.o
-
-run:
-	./main

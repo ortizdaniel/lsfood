@@ -1,8 +1,8 @@
 CC = gcc
 
-all: main clean
+all: data clean
 
-main: main.o util.o networkpic.o
+data: main.o util.o network.o networkpic.o networkent.o enterpriselist.o
 	$(CC) $^ -o $@ -Wall -Wextra -g -lpthread
 
 %.o: %.c %.h
@@ -10,6 +10,3 @@ main: main.o util.o networkpic.o
 
 clean: 
 	rm *.o
-
-run:
-	./main

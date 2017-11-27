@@ -1,8 +1,8 @@
 CC = gcc
 
-all: main clean
+all: picard clean
 
-main: main.o util.o menu.o network.o
+picard: main.o util.o menu.o network.o
 	$(CC) $^ -o $@ -Wall -Wextra -g -lpthread
 
 %.o: %.c %.h
@@ -10,6 +10,3 @@ main: main.o util.o menu.o network.o
 
 clean: 
 	rm *.o
-
-run:
-	./main

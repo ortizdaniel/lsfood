@@ -1,9 +1,9 @@
 /***********************************************************************
 *
 * @Archivo:	util.h util.c
-* @Finalidad: proporcionar distintas utilidades para Data
+* @Finalidad: proporcionar distintas utilidades para Enterprise
 * @Autor: Daniel y Elena
-* @Fecha: 30/10/17
+* @Fecha: 22/10/17
 *
 ************************************************************************/
 
@@ -129,20 +129,4 @@ ssize_t read_clean(int fd, char* buffer, size_t max) {
 	ssize_t bytes = read(fd, buffer, max);
 	buffer[bytes - 1] = '\0';
 	return bytes;
-}
-
-/***********************************************************************
-*
-* @Nombre: is_numeric
-* @Def: funcion privada para saber si una string contiene unicamente
-		digitos
-* @Arg: In: str = string en consulta
-* @Ret: 1 si es numerica, 0 si no
-************************************************************************/
-int is_numeric(char* str) {
-	char* ptr;
-	for (ptr = str; *ptr != '\0'; ptr++) {
-		if (!isdigit(*ptr)) return 0;
-	}
-	return 1;
 }

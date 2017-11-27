@@ -4,14 +4,14 @@
 * @Finalidad: 	proporcionar herramientas para comunicarse facilmente con
 				Picards
 * @Autor: Daniel y Elena
-* @Fecha: 29/10/17
+* @Fecha: 22/11/17
 *
 ************************************************************************/
 
-#ifndef _NETWORK_PICARD_H
-#define _NETWORK_PICARD_H
+#ifndef _NETWORK_PIC_H
+#define _NETWORK_PIC_H
 
-#define _GNU_SOURCE
+#define _GNU_SOURCE //necesario para la función asprintf()
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -23,9 +23,11 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 
 #include "network.h"
-#include "enterpriselist.h"
+#include "util.h"
+#include "lista.h"
 
 
 /***********************************************************************
@@ -36,25 +38,26 @@
 			port = puerto en el cual escuchar las conexiones de Picard
 * @Ret: 0 si todo se ha creado correctamente, un numero en caso de que no
 ************************************************************************/
-int network_pic_init(char* ip, int port);
+int net_pic_init(const char* ip, int port);
+
 
 /***********************************************************************
 *
 * @Nombre: send_connect_ok
 * @Def: envia una trama de ok conexión a un picard
-* @Arg: In: pic_fd = file descriptor del picard
+* @Arg: In: fd = file descriptor del picard
 * @Ret: numero de bytes totales escritos
 ************************************************************************/
-int send_connect_ok(int pic_fd); 
+int send_connect_ok(int fd);
 
 /***********************************************************************
 *
 * @Nombre: send_connect_ko
 * @Def: envia una trama de ko conexión a un picard
-* @Arg: In: pic_fd = file descriptor del picard
+* @Arg: In: fd = file descriptor del picard
 * @Ret: numero de bytes totales escritos
 ************************************************************************/
-int send_connect_ko(int pic_fd);
+int send_connect_ko(int fd);
 
 /***********************************************************************
 *
@@ -64,6 +67,6 @@ int send_connect_ko(int pic_fd);
 * @Arg: -
 * @Ret: -
 ************************************************************************/
-int network_pic_end();
+void net_pic_end();
 
 #endif

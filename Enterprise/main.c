@@ -4,29 +4,18 @@
 #include "networkdata.h"
 #include "networkpic.h"
 #include "lista.h"
-
-#define MAX_IP 16
-
-typedef struct {
-	char* nombre;
-	int t_act;
-	char ip_data[MAX_IP]; //para conectarse a DATA
-	int port_data;
-	char ip_pic[MAX_IP]; //donde se conectan los PICs
-	int port_pic;
-} Config;
-
-typedef struct {
-	char* nombre;
-	int cantidad;
-	int precio;
-} Plato;
+#include "lista_lista.h"
 
 Plato** platos;
 int n_platos;
 Config c;
 int n_users = 0;
-Lista l;
+Lista picards; //lista de file descriptors de picards
+Lista_Lista reservas; //lista de lista de los pedidos de cada Picard
+pthread_mutex_t mtx_users = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mtx_platos = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mtx_picards = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mtx_reservas = PTHREAD_MUTEX_INITIALIZER;
 
 //Cabeceras
 void destroy_config(Config* c);
@@ -41,6 +30,8 @@ int main(int argc, char const *argv[]) {
 		return 1;
 	}
 
+	util_init();
+
 	if (read_config(argv[1], &c) == 0) {
 		if ((platos = read_food(argv[2], &n_platos)) == NULL) {
 			print(2, "[Error al leer fichero de menú]\n");
@@ -48,21 +39,27 @@ int main(int argc, char const *argv[]) {
 			exit(1);
 		}
 
-		if (LISTA_crea(&l) == 0) {
+		print(1, "Carregat menú!\n");
+		if (LISTA_crea(&picards) == 0) {
 			destroy_config(&c);
 			destroy_menu();
 			exit(2);
 		}
 
+		L_LISTA_crea(&reservas);
+
 		//init cosas
 		signal(SIGALRM, handle_int);
 		signal(SIGINT, handle_int);
+		signal(SIGTERM, handle_int);
 
 		if (send_connect_data(c.nombre, c.ip_pic, c.port_pic, c.ip_data, c.port_data) != 0) {
+			print(2, "No se pudo conectar a Data.\n");
 			handle_int(SIGINT);
 		}
 
 		if (net_pic_init(c.ip_pic, c.port_pic) != 0) {
+			print(2, "No se pudo inicializar el socket para clientes.\n");
 			handle_int(SIGINT);
 		}
 
@@ -86,11 +83,22 @@ void handle_int(int n) {
 	if (n == SIGALRM) {
 		send_update_data(c.ip_data, c.port_data, c.port_pic, n_users);
 		alarm(c.t_act);
-	} else if (n == SIGINT) {
+		int i;
+	} else if (n == SIGINT || n == SIGTERM) {
+		avisar_caida();
 		destroy_config(&c);
 		destroy_menu();
-		LISTA_destruir(&l);
+		LISTA_destruir(&picards);
 		send_disconnect_data(c.ip_data, c.port_data, c.port_pic);
+		L_LISTA_irPrincipio(&reservas);
+		while (!L_LISTA_final(reservas)) {
+			Lista_Reserva *l = L_LISTA_consultar(reservas);
+			L_RESERVA_destruir(l);
+			L_LISTA_avanzar(&reservas);
+		}
+		L_LISTA_destruir(&reservas);
+		util_end();
+		net_pic_end();
 		exit(1);
 	}
 }
@@ -105,7 +113,6 @@ void handle_int(int n) {
 void destroy_menu() {
 	int i;
 	for (i = 0; i < n_platos; i++) {
-		//print(1, "%s\n%d\n%d\n", platos[i]->nombre, platos[i]->cantidad, platos[i]->precio);
 		free(platos[i]->nombre);
 		free(platos[i]);
 	}

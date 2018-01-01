@@ -78,11 +78,12 @@ char* read_until(int fd, char stop) {
 			ptr[count] = '\0';
 			break;
 		}
-		char* tmp = (char *) realloc(ptr, sizeof(char) * (++count));
+		char* tmp = (char *) realloc(ptr, sizeof(char) * (count + 2));
 		if (tmp == NULL) {
 			free(ptr);
 			return NULL;
 		} else {
+			count += 1;
 			ptr = tmp;
 		}
 		//if (!buffer) return 0;
@@ -194,4 +195,16 @@ ssize_t read_clean(int fd, char* buffer, size_t max) {
 	ssize_t bytes = read(fd, buffer, max);
 	buffer[bytes - 1] = '\0';
 	return bytes;
+}
+
+void remove_extra_spaces(char *str) {
+    char *dest = str;
+    while (*str != '\0')
+    {
+        while (*str == ' ' && *(str + 1) == ' ') {
+            str++;
+        }
+       *dest++ = *str++;
+    }
+    *dest = '\0';
 }

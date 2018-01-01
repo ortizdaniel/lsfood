@@ -77,6 +77,7 @@ int _is_numeric(char* str) {
 ************************************************************************/
 int read_cmd(char** cmd, char** arg1, char** arg2) {
 	char *buffer = read_until(0, '\n');
+	remove_extra_spaces(buffer);
 	char *first = strchr(buffer, ' ');
 	char *next;
 
@@ -148,7 +149,6 @@ int check_input(const char* cmd, int n_args) {
 	if (n_args == 1) {
 		if (strcmpign(cmd, CONNECTA_M) == 0) {
 			return CONNECTA;
-			/**/
 		} else if (strcmpign(cmd, MOSTRA_MENU_M) == 0) {
 			return MOSTRA_MENU;
 		} else if (strcmpign(cmd, PAGAR_M) == 0) {

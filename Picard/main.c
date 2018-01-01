@@ -2,6 +2,9 @@
 #include "menu.h"
 #include "network.h"
 
+#define CONECTADO print(1, "Ya estas conectado! No puedes conectarte otra vez.\n")
+#define NO_CONECTADO print(1, "No estas conectado!\n")
+
 Config c;
 
 void handle_int(int n);
@@ -25,6 +28,7 @@ int main(int argc, const char *argv[]) {
 	}
 	//Hasta aqui no hay errores de config
 	signal(SIGINT, handle_int);
+	signal(SIGTERM, handle_int);
 
 	menu(c.nombre, c.dinero);
 	char *cmd, *arg1, *arg2;
@@ -34,18 +38,26 @@ int main(int argc, const char *argv[]) {
 		show_prompt(c.nombre);
 		n_args = read_cmd(&cmd, &arg1, &arg2);
 		int check = check_input(cmd, n_args);
+		if (check != ERROR && is_connected()) {
+			if (net_verify_alive() == 0) {
+				raise(SIGINT);
+			}
+		}
 		switch (check) {
 			case CONNECTA:
 				connecta();
 				break;
 			case MOSTRA_MENU:
-				cmd_ok();
+				if (is_connected()) net_ask_menu();
+				else NO_CONECTADO;
 				break;
 			case DEMANA:
-				cmd_ok();
+				if (is_connected()) net_demana(arg2, atoi(arg1));
+				else NO_CONECTADO;
 				break;
 			case ELIMINA:
-				cmd_ok();
+				if (is_connected()) net_elimina(arg2, atoi(arg1));
+				else NO_CONECTADO;
 				break;
 			case DESCONNECTA:
 				net_end();
@@ -54,7 +66,8 @@ int main(int argc, const char *argv[]) {
 				exit = 1;
 				break;
 			case PAGAR:
-				cmd_ok();
+				if (is_connected()) net_pagar();
+				else NO_CONECTADO;
 				break;
 			case ERROR:
 			default:
@@ -77,7 +90,13 @@ int main(int argc, const char *argv[]) {
 * @Ret: -
 ************************************************************************/
 void handle_int(int n) {
-	if (n == SIGINT) {
+	if (n == SIGINT || n == SIGTERM) {
+		if (is_connected) {
+			print(1, "\n[Desconectado de Enterprise...]\n");
+			net_end();
+			net_disconnect();
+			print(1, "[Desconectado!]\n");
+		}
 		print(1, "\n[Tancat inesperadament]\n[Alliberant recursos...]\n");
 		destroy_config(c);
 		print(1, "[Recursos alliberats]\n");
@@ -96,16 +115,15 @@ void handle_int(int n) {
 int connecta() {
 	print(1, "Connectant amb LsEat...\n");
 	if (is_connected()) {
-		print(1, "Ya estas conectado! No puedes conectarte otra vez.\n");
+		CONECTADO;
 		return 5;
 	} else {
 		if (net_connect(c.ip, c.port) == 0) {
 			print(1, "[Connexió amb Data OK]\n");
 			send_connect(c.nombre);
-			//TODO desconectar de Data, conectar con Enterprise
 			Packet recibido;
 			if (read_packet(&recibido) > 0) {
-				if (recibido.type == 0x01) {
+				if (recibido.type == TYPE_CONEXION) {
 					if (strcmp(recibido.header, "[ENT_INF]") == 0) {
 						net_disconnect();
 						net_handle(recibido);

@@ -110,21 +110,16 @@ int net_handle(Packet p) {
 	char* ip_start = strchr(port_end + 1, '_') + 1;
 	char* ip_end = strchr(ip_start, ']');
 	*ip_end = 0;
-	//print(1, p.data);
-	//print(1, "\n");
 	if (net_connect(ip_start, atoi(port_start)) == 0) {
-		//print(1, "[Connexió amb Enterprise OK - [Viene de DATA]]\n");
 		char* data;
 		asprintf(&data, "[PICARD_%s&PICARD_%d]", c.nombre, c.dinero);
-		_send_packet(sock, 1, "[PIC_INF]", strlen(data), data);
+		_send_packet(sock, TYPE_CONEXION, "[PIC_INF]", strlen(data), data);
 		free(data);
 
 		Packet p;
 		if (read_packet(&p) > 0) {
-			//printf("0x%.2X\n%s\n%d\n%s\n", p.type, p.header, p.length, p.data);
-			if (p.type == 1 && strcmp(p.header, "[CONOK]") == 0) {
+			if (p.type == TYPE_CONEXION && strcmp(p.header, "[CONOK]") == 0) {
 				print(1, "[Connexió amb Enterprise OK]\n");
-				//print(1, "SOCK: %d\n", sock);
 			}  else {
 				print(1, "[Connexió amb Enterprise KO]\n");
 				net_disconnect();
@@ -151,12 +146,7 @@ int net_handle(Packet p) {
 int send_connect(char* name) {
 	char* data = (char*) malloc(9 + strlen(name));
 	if (data == NULL) return 0;
-	return _send_packet(sock, TYPE_CONNECT, HEADER_PIC_NAME, sprintf(data, "[PICARD_%s]", name), data);
-}
-
-//PRIVADA, DEPRECATED, PRUEBAS
-int send_aux() {
-	return _send_packet(sock, 0x01, "[DANI]", strlen("[ELENA]"), "[ELENA]");
+	return _send_packet(sock, TYPE_CONEXION, HEADER_PIC_NAME, sprintf(data, "[PICARD_%s]", name), data);
 }
 
 /***********************************************************************
@@ -178,8 +168,7 @@ size_t read_packet(Packet* p) {
 	if ((tmp = read(sock, p->header, MAX_HEADER_REAL)) < MAX_HEADER_REAL) {
 		return 0;
 	}
-	//char* ptr = strchr(p->header, ' ');
-	//if (ptr != NULL) *ptr = '\0';
+
 	leidos += tmp;
 
 	char low, high;
@@ -192,11 +181,6 @@ size_t read_packet(Packet* p) {
 	}
 	leidos += tmp;
 	p->length = (high << 8) | low;
-
-	/*if ((tmp = read(sock, &p->length, MAX_LENGTH)) <= 0) {
-		return 0;
-	}
-	leidos += tmp;*/
 
 	p->data = (char *) calloc(p->length + 1, sizeof(char));
 	if (p->data == NULL) {
@@ -219,12 +203,123 @@ size_t read_packet(Packet* p) {
 * @Ret: -
 ************************************************************************/
 int net_end() {
-	//print(1, "SOCK: %d\n", sock);
 	char* data;
 	asprintf(&data, "[PICARD_%s]", c.nombre);
-	int bytes = _send_packet(sock, 2, "[PIC_NAME]", strlen(data), data);
-	//print(1, "ESCRITOS: %d", bytes);
+	int bytes = _send_packet(sock, TYPE_DESCONEXION, "[PIC_NAME]", strlen(data), data);
 	print(1, "[Desconnecta Enterprise OK]\n");
 	free(data);
 	return bytes;
+}
+
+/***********************************************************************
+*
+* @Nombre: net_verify_alive
+* @Def: verifica si el Enterprise al que se está conectado ha enviado
+		una trama de desconexion avisando que se ha caido
+* @Arg: -
+* @Ret: 0 si se cayó Enterprise, 1 si no
+************************************************************************/
+int net_verify_alive() {
+	int bytes;
+	ioctl(sock, FIONREAD, &bytes);
+	if (bytes > 0) {
+		Packet p;
+		read_packet(&p);
+		if (p.type == TYPE_DESCONEXION && strcmp(p.header, "[CONKO]") == 0) {
+			print(1, "[Servidor Enterprise se ha caido! Deteniendo ejecución...]\n");
+			return 0;
+		}
+		free(p.data);
+	}
+	return 1;
+}
+
+/***********************************************************************
+*
+* @Nombre: net_ask_menu
+* @Def: le pide al Enterprise que envie el menu, lo recibe y muestra por
+		pantalla
+* @Arg: -
+* @Ret: -
+************************************************************************/
+void net_ask_menu() {
+	_send_packet(sock, TYPE_SHOW_MENU, "[SHW_MENU]", 0, "");
+	Packet p;
+	print(1, "MENU DISPONIBLE\n");
+	int flag = 0;
+	while (1) {
+		if (read_packet(&p) > 0 && p.type == TYPE_SHOW_MENU) {
+			if (strcmp(p.header, "[DISH]") == 0) {
+				char* precio = strchr(p.data, '&');
+				*precio++ = 0;
+				//p.data + 1 = nombre
+				char* stock = strchr(precio + 1, '&');
+				*stock++ = 0;
+				*strchr(stock, ']') = 0;
+				if (atoi(stock) != 0) {
+					print(1, "%s (%s euros)\n", p.data + 1, precio);
+					flag = 1;
+				}
+			} else if (strcmp(p.header, "[END_MENU]") == 0) {
+				break;
+			}
+		}
+		free(p.data);
+	}
+	if (flag == 0) {
+		print(1, "No hay ningun plato disponible...\n");
+	}
+}
+
+/***********************************************************************
+*
+* @Nombre: net_demana
+* @Def: intenta realizar una reserva al restaurante Enterprise
+* @Arg: In: nombre de plato, cantidad deseada
+* @Ret: -
+************************************************************************/
+void net_demana(char* nombre, int cantidad) {
+	char* data;
+	asprintf(&data, "[%s&%d]", nombre, cantidad);
+	_send_packet(sock, TYPE_DEMANA, "[NEW_ORD]", strlen(data), data);
+	Packet p;
+	if (read_packet(&p) > 0) {
+		print(1, "%s\n", p.data);
+		free(p.data);
+	}
+}
+
+/***********************************************************************
+*
+* @Nombre: net_elimina
+* @Def: intenta eliminar una reserva o parte de una al restaurante Enterprise
+* @Arg: In: nombre de plato, cantidad deseada
+* @Ret: -
+************************************************************************/
+void net_elimina(char* nombre, int cantidad) {
+	char* data;
+	asprintf(&data, "[%s&%d]", nombre, cantidad);
+	_send_packet(sock, TYPE_ELIMINA, "[DEL_ORD]", strlen(data), data);
+	Packet p;
+	if (read_packet(&p) > 0) {
+		print(1, "%s\n", p.data);
+		free(p.data);
+	}
+}
+
+/***********************************************************************
+*
+* @Nombre: net_pagar
+* @Def: avisa a Enterprise de que se quiere pagar
+* @Arg: -
+* @Ret: -
+************************************************************************/
+void net_pagar() {
+	_send_packet(sock, TYPE_PAGAR, "[PAY]", 0, "");
+	Packet p;
+	if (read_packet(&p) > 0) {
+		*strchr(p.data, ']') = 0;
+		print(1, "Son %s euros. Carregat en el seu compte.\n", p.data + 1);
+		free(p.data);
+	}
 }

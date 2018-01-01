@@ -27,16 +27,18 @@ int main(int argc, char const *argv[]) {
 		if (enterprises_init() == 0) {
 			exit(2);
 		}
-		print(1, "Lista creada!\n");
 
 		signal(SIGINT, handle_int);
+		signal(SIGTERM, handle_int);
 		if (network_pic_init(c.ip, c.port_pic) != 0) {
-			print(2, "[Error inicializar socket...]\n");
+			network_pic_end();
+			print(2, "[Error inicializar socket Picards...]\n");
 			exit(1);
 		}
 		if (network_ent_init(c.ip, c.port_ent)) {
 			network_pic_end();
-			print(2, "[Error inicializar socket...]\n");
+			network_ent_end();
+			print(2, "[Error inicializar socket Enterprises...]\n");
 			exit(1);
 		}
 		print(1, "Executant Data\nEsperant clients...\nEsperant enterprises...\n");
@@ -56,7 +58,7 @@ int main(int argc, char const *argv[]) {
 * @Ret: -
 ************************************************************************/
 void handle_int(int n) {
-	if (n == SIGINT) {
+	if (n == SIGINT || n == SIGTERM) {
 		print(1, "\n[Cerrando... por favor espere...]\n");
 		network_ent_end();
 		network_pic_end();

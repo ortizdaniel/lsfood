@@ -94,4 +94,6 @@ int strcmpign(const char* a, const char* b);
 ************************************************************************/
 ssize_t read_clean(int fd, char* buffer, size_t max);
 
+void remove_extra_spaces(char* str);
+
 #endif

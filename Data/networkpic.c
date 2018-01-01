@@ -26,8 +26,7 @@ extern pthread_mutex_t mtx;
 * @Arg: In: arg = no usado
 * @Ret: NULL
 ************************************************************************/
-void* _listen_thread(void* arg) {
-	if (arg == NULL) {};
+void* _listen_thread() {
 	while (alive) {
 		struct sockaddr_in con;
 		socklen_t pic_len = sizeof(con);
@@ -41,7 +40,7 @@ void* _listen_thread(void* arg) {
 			if (size > 0) {
 				//se ha leido una trama correctamente
 				//printf("0x%.2X\n%s\n%d\n%s\n", p.type, p.header, p.length, p.data);
-				if (p.type == 0x01 && strcmp(p.header, "[PIC_NAME]") == 0) {
+				if (p.type == CONEXION && strcmp(p.header, "[PIC_NAME]") == 0) {
 					char* name = strchr(p.data, '_') + 1;
 					*strchr(name, ']') = 0;
 					print(1, "Connectant %s\n", name);
@@ -159,7 +158,7 @@ int send_connect_ok(int pic_fd) {
 		int bytes = asprintf(&data, "[ENTERPRISE_%s&ENTERPRISE_%d&ENTERPRISE_%s]", \
 			dest->nombre, dest->port, dest->ip);
 		//print(1, "%s\n", data);
-		return send_packet(pic_fd, 1, "[ENT_INF]", bytes, data);
+		return send_packet(pic_fd, CONEXION, "[ENT_INF]", bytes, data);
 	}
 }
 
@@ -171,5 +170,5 @@ int send_connect_ok(int pic_fd) {
 * @Ret: numero de bytes totales escritos
 ************************************************************************/
 int send_connect_ko(int pic_fd) {
-	return send_packet(pic_fd, 1, "[CONKO]", 0, "");
+	return send_packet(pic_fd, CONEXION, "[CONKO]", 0, "");
 }

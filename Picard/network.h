@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/ioctl.h>
 
 #include "util.h"
 
@@ -32,7 +33,12 @@
 #define MAX_LENGTH sizeof(uint16_t)
 #define SIZE_NO_DATA MAX_TYPE + MAX_HEADER_REAL + MAX_LENGTH
 
-#define TYPE_CONNECT 0x01
+#define TYPE_CONEXION 1
+#define TYPE_DESCONEXION 2
+#define TYPE_SHOW_MENU 3
+#define TYPE_DEMANA 4
+#define TYPE_ELIMINA 5
+#define TYPE_PAGAR 6
 #define HEADER_PIC_NAME "[PIC_NAME]"
 
 typedef struct {
@@ -106,5 +112,52 @@ size_t read_packet(Packet* p);
 * @Ret: -
 ************************************************************************/
 int net_end();
+
+/***********************************************************************
+*
+* @Nombre: net_verify_alive
+* @Def: verifica si el Enterprise al que se está conectado ha enviado
+		una trama de desconexion avisando que se ha caido
+* @Arg: -
+* @Ret: 0 si se cayó Enterprise, 1 si no
+************************************************************************/
+int net_verify_alive();
+
+/***********************************************************************
+*
+* @Nombre: net_ask_menu
+* @Def: le pide al Enterprise que envie el menu, lo recibe y muestra por
+		pantalla
+* @Arg: -
+* @Ret: -
+************************************************************************/
+void net_ask_menu();
+
+/***********************************************************************
+*
+* @Nombre: net_demana
+* @Def: intenta realizar una reserva al restaurante Enterprise
+* @Arg: In: nombre de plato, cantidad deseada
+* @Ret: -
+************************************************************************/
+void net_demana(char* nombre, int cantidad);
+
+/***********************************************************************
+*
+* @Nombre: net_elimina
+* @Def: intenta eliminar una reserva o parte de una al restaurante Enterprise
+* @Arg: In: nombre de plato, cantidad deseada
+* @Ret: -
+************************************************************************/
+void net_elimina(char* nombre, int cantidad);
+
+/***********************************************************************
+*
+* @Nombre: net_pagar
+* @Def: avisa a Enterprise de que se quiere pagar
+* @Arg: -
+* @Ret: -
+************************************************************************/
+void net_pagar();
 
 #endif

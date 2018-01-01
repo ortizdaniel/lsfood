@@ -28,6 +28,20 @@
 #define MAX_LENGTH sizeof(uint16_t)
 #define SIZE_NO_DATA MAX_TYPE + MAX_HEADER_REAL + MAX_LENGTH
 
+#define CONEXION 1
+#define DESCONEXION 2
+#define SHOW_MENU 3
+#define DEMANA 4
+#define ELIMINA 5
+#define PAGAR 6
+#define UPDATE 7
+
+#define ERROR_TRAMA "Error en la trama."
+#define RESERVA_CORRECTA "Reserva hecha correctamente."
+#define SIN_DINERO "No hay dinero suficiente."
+#define SIN_STOCK "No hay stock suficiente."
+#define PLATO_INVALIDO "No existe el plato."
+
 typedef struct {
 	uint8_t type;
 	char header[MAX_HEADER_FAKE];

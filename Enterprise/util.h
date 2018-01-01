@@ -17,6 +17,43 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <sys/stat.h>
+#include <semaphore.h>
+
+#define MAX_IP 16
+
+typedef struct {
+	char* nombre;
+	int t_act;
+	char ip_data[MAX_IP]; //para conectarse a DATA
+	int port_data;
+	char ip_pic[MAX_IP]; //donde se conectan los PICs
+	int port_pic;
+} Config;
+
+typedef struct {
+	char* nombre;
+	int cantidad;
+	int precio;
+} Plato;
+
+/***********************************************************************
+*
+* @Nombre: util_init
+* @Def: inicializa un semaforo para que el método print sea sincrono
+* @Arg: -
+* @Ret: -
+************************************************************************/
+void util_init();
+
+/***********************************************************************
+*
+* @Nombre: util_end
+* @Def: libera los recursos usados por el semaforo
+* @Arg: -
+* @Ret: -
+************************************************************************/
+void util_end();
 
 /***********************************************************************
 *

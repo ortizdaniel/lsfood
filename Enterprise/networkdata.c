@@ -44,11 +44,11 @@ int send_connect_data(char* name, char* my_ip, int my_port, char* data_ip, int d
 
 	char* data;
 	int bytes = asprintf(&data, "[ENTERPRISE_%s&ENTERPRISE_%d&ENTERPRISE_%s]", name, my_port, my_ip);
-	send_packet(sock, 1, "[ENT_INF]", bytes, data);
+	send_packet(sock, CONEXION, "[ENT_INF]", bytes, data);
 	free(data);
 
 	Packet p;
-	if (read_packet(sock, &p) > 0 && p.type == 1 && strcmp(p.header, "CONOK") == 0) {
+	if (read_packet(sock, &p) > 0 && p.type == CONEXION && strcmp(p.header, "CONOK") == 0) {
 		free(p.data);
 		close(sock);
 		return 0;
@@ -89,11 +89,11 @@ int send_update_data(char* data_ip, int data_port, int my_port, int n_users) {
 
 	char* data;
 	int bytes = asprintf(&data, "[ENTERPRISE_%d&%d]", my_port, n_users);
-	send_packet(sock, 7, "[UPDATE]", bytes, data);
+	send_packet(sock, UPDATE, "[UPDATE]", bytes, data);
 	free(data);
 
 	Packet p;
-	if (read_packet(sock, &p) > 0 && p.type == 7 && strcmp(p.header, "[UPDATEOK]") == 0) {
+	if (read_packet(sock, &p) > 0 && p.type == UPDATE && strcmp(p.header, "[UPDATEOK]") == 0) {
 		free(p.data);
 		close(sock);
 		return 0;
@@ -133,11 +133,11 @@ int send_disconnect_data(char* data_ip, int data_port, int my_port) {
 
 	char* data;
 	int bytes = asprintf(&data, "[ENTERPRISE_%d]", my_port);
-	send_packet(sock, 2, "[ENT_INF]", bytes, data);
+	send_packet(sock, DESCONEXION, "[ENT_INF]", bytes, data);
 	free(data);
 
 	Packet p;
-	if (read_packet(sock, &p) > 0 && p.type == 2 && strcmp(p.header, "[CONOK]") == 0) {
+	if (read_packet(sock, &p) > 0 && p.type == DESCONEXION && strcmp(p.header, "[CONOK]") == 0) {
 		free(p.data);
 		close(sock);
 		return 0;

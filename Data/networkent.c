@@ -27,7 +27,7 @@ extern pthread_mutex_t mtx;
 * @Ret: -
 ************************************************************************/
 void _handle_packet(int fd, Packet p) {
-	if (p.type == 1) {
+	if (p.type == CONEXION) {
 		if (strcmp(p.header, "[ENT_INF]") == 0) {
 			char* name_start = strchr(p.data, '_') + 1;
 			char* name_end = strchr(name_start, '&');
@@ -58,7 +58,7 @@ void _handle_packet(int fd, Packet p) {
 		} else {
 			send_packet(fd, 1, "CONKO", 0, "");
 		}
-	} else if (p.type == 2) {
+	} else if (p.type == DESCONEXION) {
 		if (strcmp(p.header, "[ENT_INF]") == 0) {
 			char* port_start = strchr(p.data, '_') + 1;
 			char* port_end = strchr(port_start, ']');
@@ -83,7 +83,7 @@ void _handle_packet(int fd, Packet p) {
 		} else {
 			send_packet(fd, 2, "[CONKO]", 0, "");
 		}
-	} else if (p.type == 7) {
+	} else if (p.type == UPDATE) {
 		if (strcmp(p.header, "[UPDATE]") == 0) {
 			char* port_start = strchr(p.data, '_') + 1;
 			char* port_end = strchr(port_start, '&');

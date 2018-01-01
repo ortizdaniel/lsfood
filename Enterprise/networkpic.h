@@ -28,6 +28,7 @@
 #include "network.h"
 #include "util.h"
 #include "lista.h"
+#include "lista_lista.h"
 
 
 /***********************************************************************
@@ -48,7 +49,7 @@ int net_pic_init(const char* ip, int port);
 * @Arg: In: fd = file descriptor del picard
 * @Ret: numero de bytes totales escritos
 ************************************************************************/
-int send_connect_ok(int fd);
+inline int send_connect_ok(int fd);
 
 /***********************************************************************
 *
@@ -57,16 +58,26 @@ int send_connect_ok(int fd);
 * @Arg: In: fd = file descriptor del picard
 * @Ret: numero de bytes totales escritos
 ************************************************************************/
-int send_connect_ko(int fd);
+inline int send_connect_ko(int fd);
 
 /***********************************************************************
 *
 * @Nombre: net_pic_end
-* @Def: finaliza el modulo, cierra todas las conexiones activas, finaliza
-		los threads, liberar recursos
+* @Def: cierra el socket para aceptar conexiones de Picard y detiene el
+		thread
 * @Arg: -
 * @Ret: -
 ************************************************************************/
 void net_pic_end();
+
+/***********************************************************************
+*
+* @Nombre: avisar_caida
+* @Def: avisa a todos los Picards conectados que el servidor Enterprise
+		está deteniendo su ejecución
+* @Arg: -
+* @Ret: -
+************************************************************************/
+void avisar_caida();
 
 #endif

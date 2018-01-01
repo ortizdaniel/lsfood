@@ -26,7 +26,11 @@
 #define MAX_HEADER_REAL 10
 #define MAX_HEADER_FAKE 11
 #define MAX_LENGTH sizeof(uint16_t)
-#define SIZE_NO_DATA MAX_TYPE + MAX_HEADER_REAL + MAX_LENGTH
+#define SIZE_NO_DATA MAX_TYPE + MAX_HEADER_REAL + MAX_LENGTH //excepto este
+
+#define CONEXION 1
+#define DESCONEXION 2
+#define UPDATE 7
 
 typedef struct {
 	uint8_t type;

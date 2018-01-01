@@ -9,6 +9,30 @@
 
 #include "util.h"
 
+sem_t sem;
+
+/***********************************************************************
+*
+* @Nombre: util_init
+* @Def: inicializa un semaforo para que el método print sea sincrono
+* @Arg: -
+* @Ret: -
+************************************************************************/
+void util_init() {
+	sem_init(&sem, 0, 1);
+}
+
+/***********************************************************************
+*
+* @Nombre: util_end
+* @Def: libera los recursos usados por el semaforo
+* @Arg: -
+* @Ret: -
+************************************************************************/
+void util_end() {
+	sem_close(&sem);
+}
+
 /***********************************************************************
 *
 * @Nombre: print
@@ -18,6 +42,7 @@
 * @Ret: -
 ************************************************************************/
 void print(int fd, const char* format, ...) {
+	
 	va_list list;
 	va_start(list, format);
 	char buff[128];
@@ -27,7 +52,7 @@ void print(int fd, const char* format, ...) {
 	int len = strlen(format);
 	int num;
 	char c;
-
+	sem_wait(&sem);
 	for (i = 0; i < len; i++) {
 		c = format[i];
 		if (c != '%') {
@@ -56,6 +81,7 @@ void print(int fd, const char* format, ...) {
 			}
 		}
 	}
+	sem_post(&sem);
 	va_end(list);
 }
 
